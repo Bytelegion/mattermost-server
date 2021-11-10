@@ -7,8 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
+	// "strconv"
 	"strings"
+	
 
 	"github.com/mattermost/mattermost-server/v6/einterfaces"
 	"github.com/mattermost/mattermost-server/v6/model"
@@ -18,11 +19,13 @@ type GitLabProvider struct {
 }
 
 type GitLabUser struct {
-	Id       int64  `json:"id"`
-	Username string `json:"username"`
+	Id       string  `json:"sub"`
+	Username string `json:"nickname"`
 	Login    string `json:"login"`
 	Email    string `json:"email"`
 	Name     string `json:"name"`
+	
+	// EmailVerified string `json:"email_verified"`
 }
 
 func init() {
@@ -31,6 +34,7 @@ func init() {
 }
 
 func userFromGitLabUser(glu *GitLabUser) *model.User {
+	
 	user := &model.User{}
 	username := glu.Username
 	if username == "" {
@@ -58,16 +62,20 @@ func userFromGitLabUser(glu *GitLabUser) *model.User {
 
 func gitLabUserFromJSON(data io.Reader) (*GitLabUser, error) {
 	decoder := json.NewDecoder(data)
+	
+	
 	var glu GitLabUser
 	err := decoder.Decode(&glu)
 	if err != nil {
 		return nil, err
 	}
+	
 	return &glu, nil
 }
 
 func (glu *GitLabUser) IsValid() error {
-	if glu.Id == 0 {
+	
+	if glu.Id == "" {
 		return errors.New("user id can't be 0")
 	}
 
@@ -79,11 +87,15 @@ func (glu *GitLabUser) IsValid() error {
 }
 
 func (glu *GitLabUser) getAuthData() string {
-	return strconv.FormatInt(glu.Id, 10)
+	// return strconv.FormatInt(glu.Id, 10)
+	return glu.Id
 }
 
 func (m *GitLabProvider) GetUserFromJSON(data io.Reader, tokenUser *model.User) (*model.User, error) {
 	glu, err := gitLabUserFromJSON(data)
+
+	
+	
 	if err != nil {
 		return nil, err
 	}

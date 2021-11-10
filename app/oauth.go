@@ -555,14 +555,21 @@ func (a *App) CompleteOAuth(c *request.Context, service string, body io.ReadClos
 
 func (a *App) getSSOProvider(service string) (einterfaces.OAuthProvider, *model.AppError) {
 	sso := a.Config().GetSSOService(service)
+
+	
 	if sso == nil || !*sso.Enable {
 		return nil, model.NewAppError("getSSOProvider", "api.user.authorize_oauth_user.unsupported.app_error", nil, "service="+service, http.StatusNotImplemented)
 	}
 	providerType := service
-	if strings.Contains(*sso.Scope, OpenIDScope) {
-		providerType = model.ServiceOpenid
-	}
+	// if strings.Contains(*sso.Scope, OpenIDScope) {
+	// 	providerType = model.ServiceOpenid
+	// }
+
+	
+
 	provider := einterfaces.GetOAuthProvider(providerType)
+
+	
 	if provider == nil {
 		return nil, model.NewAppError("getSSOProvider", "api.user.login_by_oauth.not_available.app_error",
 			map[string]interface{}{"Service": strings.Title(service)}, "", http.StatusNotImplemented)
